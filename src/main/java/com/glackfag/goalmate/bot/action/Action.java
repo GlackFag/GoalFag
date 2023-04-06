@@ -1,0 +1,18 @@
+package com.glackfag.goalmate.bot.action;
+
+public enum Action {
+    SEND_GREETINGS,
+    FORGOTTEN_USER,
+    REGISTER,
+    SHOW_MENU,
+    FORGET,
+    SEND_NEW_GOAL_ESSENCE_FORM,
+    SEND_NEW_GOAL_TIMEFRAME_FORM,
+    SAVE_GOAL,
+    FINISH_GOAL,
+    DELETE_GOAL,
+    FAIL_GOAL,
+    PROVIDE_STATISTICS,
+    ERROR_MESSAGE,
+    SEND_RETRY,
+}
