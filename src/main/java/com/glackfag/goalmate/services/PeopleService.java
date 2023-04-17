@@ -3,7 +3,6 @@ package com.glackfag.goalmate.services;
 import com.glackfag.goalmate.models.Person;
 import com.glackfag.goalmate.repositories.PeopleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,21 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class PeopleService {
     private final PeopleRepository repository;
-    private final PasswordEncoder encoder;
 
     @Autowired
-    public PeopleService(PeopleRepository repository, PasswordEncoder encoder) {
+    public PeopleService(PeopleRepository repository) {
         this.repository = repository;
-        this.encoder = encoder;
     }
 
     public Person findByUserId(long userId){
-        String encrypted = encoder.encode(Long.toString(userId));
-        return findByEncryptedUserId(encrypted);
-    }
-
-    public Person findByEncryptedUserId(String encrypted){
-        return repository.findByUserId(encrypted).orElse(null);
+        return repository.findByUserId(userId).orElse(null);
     }
 
     public boolean isUserIdRegistered(long userId){

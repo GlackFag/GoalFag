@@ -28,7 +28,7 @@ public class UpdateUtils {
         try {
             return update.getMessage().getText();
         } catch (NullPointerException e) {
-            return null;
+            return "";
         }
     }
 
@@ -36,7 +36,7 @@ public class UpdateUtils {
         try {
             return update.getCallbackQuery().getData();
         } catch (NullPointerException e) {
-            return null;
+            return "";
         }
     }
 
@@ -54,7 +54,6 @@ public class UpdateUtils {
             return null;
 
         String data = extractCallbackDataText(update);
-        System.out.println(data);
         List<List<InlineKeyboardButton>> rows = markup.getKeyboard();
 
         for (List<InlineKeyboardButton> row : rows)

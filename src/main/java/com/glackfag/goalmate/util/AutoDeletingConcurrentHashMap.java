@@ -4,18 +4,18 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class AutoDeletingHashMap<K, V> extends HashMap<K, V>{
+public class AutoDeletingConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> {
 
     private final Timer timer;
     @Setter
     @Getter
     private Long timeout;
 
-    public AutoDeletingHashMap(@NonNull Long timeout) {
+    public AutoDeletingConcurrentHashMap(@NonNull Long timeout) {
         timer = new Timer();
         this.timeout = timeout;
     }

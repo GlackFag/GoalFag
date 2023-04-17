@@ -4,19 +4,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -27,10 +30,12 @@ import java.util.*;
 @Slf4j
 public class GoalMateApplication {
     private final Environment environment;
+    private final ApplicationContext applicationContext;
 
     @Autowired
-    public GoalMateApplication(Environment environment) {
+    public GoalMateApplication(Environment environment, ApplicationContext applicationContext) {
         this.environment = environment;
+        this.applicationContext = applicationContext;
     }
 
     public static void main(String[] args) {
@@ -58,22 +63,6 @@ public class GoalMateApplication {
     }
 
     @Bean
-    public PasswordEncoder encoder() {
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence rawPassword) {
-                return String.valueOf(rawPassword.hashCode());
-            }
-
-            @Override
-            public boolean matches(CharSequence rawPassword, String encodedPassword) {
-                return encode(rawPassword).equals(encodedPassword);
-            }
-        };
-        //todo сделать нормальный энкодер
-    }
-
-    @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setDefaultLocale(Locale.ENGLISH);
@@ -86,15 +75,21 @@ public class GoalMateApplication {
     @Bean
     public Map<String, String> messages() {
         Map<String, String> messages = new HashMap<>();
-        messages.put("greetings", environment.getRequiredProperty("message.greetings"));
-        messages.put("forgotten", environment.getRequiredProperty("message.forgotten"));
-        messages.put("reminder", environment.getRequiredProperty("message.reminder"));
-        messages.put("menu", environment.getRequiredProperty("message.menu"));
-        messages.put("newGoalEssenceInstruction", environment.getRequiredProperty("message.newGoalEssenceInstruction"));
-        messages.put("newGoalTimeframeInstruction", environment.getRequiredProperty("message.newGoalTimeframeInstruction"));
-        messages.put("error", environment.getRequiredProperty("message.error"));
-        messages.put("retry", environment.getRequiredProperty("message.retry"));
+        Properties properties = new Properties();
 
+        try (FileInputStream fis = new FileInputStream("src/main/resources/messages.properties")) {
+            properties.load(fis);
+        } catch (IOException e) {
+            log.error("Error: Unable to read messages from messages.properties");
+            throw new Error(e);
+        }
+
+        for (var e : properties.entrySet()) {
+            String key = (String) e.getKey();
+            key = key.replaceFirst("\\w+\\.", "");
+
+            messages.put(key, (String) e.getValue());
+        }
         return Collections.unmodifiableMap(messages);
     }
 
@@ -121,7 +116,7 @@ public class GoalMateApplication {
     }
 
     @Bean
-    public InlineKeyboardMarkup timeframeInstructionMarkup(){
+    public InlineKeyboardMarkup timeframeInstructionMarkup() {
         InlineKeyboardButton year = new InlineKeyboardButton("Year");
         year.setCallbackData("12");
 
@@ -132,7 +127,8 @@ public class GoalMateApplication {
     }
 
     @Bean
-    public List<InlineKeyboardMarkup> allMarkups(){
-        return List.of(registerMarkup(), menuMarkup(), timeframeInstructionMarkup());
+    @Scope(value = "prototype")
+    public List<InlineKeyboardMarkup> allMarkups() {
+        return new ArrayList<>(applicationContext.getBeansOfType(InlineKeyboardMarkup.class).values());
     }
 }

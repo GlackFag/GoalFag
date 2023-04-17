@@ -10,5 +10,5 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface PeopleRepository extends JpaRepository<Person, Integer> {
-    Optional<Person> findByUserId(String encrypted);
+    Optional<Person> findByUserId(long chatId);
 }

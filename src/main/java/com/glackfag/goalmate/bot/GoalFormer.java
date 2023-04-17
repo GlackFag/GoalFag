@@ -6,9 +6,10 @@ import com.glackfag.goalmate.models.enums.GoalState;
 import com.glackfag.goalmate.models.enums.TimeframeType;
 import com.glackfag.goalmate.services.GoalsService;
 import com.glackfag.goalmate.services.PeopleService;
-import com.glackfag.goalmate.util.AutoDeletingHashMap;
+import com.glackfag.goalmate.util.AutoDeletingConcurrentHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -24,9 +25,10 @@ public class GoalFormer {
     public GoalFormer(GoalsService goalsService, PeopleService peopleService) {
         this.goalsService = goalsService;
         this.peopleService = peopleService;
-        storage = new AutoDeletingHashMap<>(600_000L);
+        storage = new AutoDeletingConcurrentHashMap<>(600_000L);
     }
 
+    @Transactional
     public void formNewGoal(Long userId, String essence) {
         Person creator = peopleService.findByUserId(userId);
         Goal goal = createGoal(essence, creator);
@@ -49,7 +51,7 @@ public class GoalFormer {
             goal.setExpiredDate(Date.valueOf(date));
             goal.setTimeframe(recognizeTimeframeType(date));
         } catch (NullPointerException e) {
-            throw new RuntimeException("UserId: " + userId + " not found");
+            throw new RuntimeException("Timeout for userId: " + userId + " expired");
         }
     }
 
@@ -71,10 +73,8 @@ public class GoalFormer {
             Goal goal = storage.get(userId);
             goalsService.save(goal);
             storage.remove(userId);
-
-            System.out.println(goal);
         } catch (NullPointerException e) {
-            throw new RuntimeException("UserId: " + userId + " not found");
+            throw new RuntimeException("Timeout for userId: " + userId + " expired");
         }
     }
 }

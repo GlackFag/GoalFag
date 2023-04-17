@@ -55,7 +55,6 @@ public class ActionRecognizer {
         Long userId = UpdateUtils.extractUserId(update);
         String text = UpdateUtils.extractCallbackDataText(update);
 
-        System.out.println("UserId=" + userId);
         return text.equals("/register") && !peopleService.isUserIdRegistered(userId);
     }
 
@@ -73,16 +72,17 @@ public class ActionRecognizer {
     }
 
     private boolean isSendNewGoalTimeframeForm(Update update) {
-        String userMessage = update.getMessage().getText();
+        String userInput = UpdateUtils.extractUserInput(update);
         Action lastAction = Person.getLastAction(UpdateUtils.extractUserId(update));
 
         return !update.hasCallbackQuery() && lastAction == Action.SEND_NEW_GOAL_ESSENCE_FORM &&
-                !userMessage.equalsIgnoreCase("cancel");
+                !userInput.equalsIgnoreCase("cancel");
     }
 
     private boolean isSaveGoal(Update update) {
         Long userId = UpdateUtils.extractUserId(update);
+        String userInput = UpdateUtils.extractUserInput(update);
 
-        return Person.getLastAction(userId) == Action.SEND_NEW_GOAL_TIMEFRAME_FORM;
+        return Person.getLastAction(userId) == Action.SEND_NEW_GOAL_TIMEFRAME_FORM && !userInput.equalsIgnoreCase("cancel");
     }
 }
