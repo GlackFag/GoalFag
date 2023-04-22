@@ -2,7 +2,6 @@ package com.glackfag.goalmate.util;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.List;
@@ -40,21 +39,12 @@ public class UpdateUtils {
         }
     }
 
-    public static InlineKeyboardButton getUsedInlineButton(Update update, List<InlineKeyboardMarkup> markupList) {
-        InlineKeyboardButton result = null;
-        int i = 0;
-        while (result == null && i < markupList.size()){
-            result = getUsedInlineButton(update, markupList.get(i++));
-        }
-        return result;
-    }
-
-    public static InlineKeyboardButton getUsedInlineButton(Update update, InlineKeyboardMarkup markup) {
+    public static InlineKeyboardButton getUsedInlineButton(Update update) {
         if (!update.hasCallbackQuery())
             return null;
 
         String data = extractCallbackDataText(update);
-        List<List<InlineKeyboardButton>> rows = markup.getKeyboard();
+        List<List<InlineKeyboardButton>> rows = update.getCallbackQuery().getMessage().getReplyMarkup().getKeyboard();
 
         for (List<InlineKeyboardButton> row : rows)
             for (InlineKeyboardButton e : row)

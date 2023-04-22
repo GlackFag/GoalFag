@@ -5,37 +5,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 
 @SpringBootApplication
+@EnableTransactionManagement
 @PropertySources({
         @PropertySource("classpath:application.properties"),
         @PropertySource("classpath:messages.properties")})
 @Slf4j
 public class GoalMateApplication {
     private final Environment environment;
-    private final ApplicationContext applicationContext;
 
     @Autowired
-    public GoalMateApplication(Environment environment, ApplicationContext applicationContext) {
+    public GoalMateApplication(Environment environment) {
         this.environment = environment;
-        this.applicationContext = applicationContext;
     }
 
     public static void main(String[] args) {
@@ -63,23 +60,13 @@ public class GoalMateApplication {
     }
 
     @Bean
-    public MessageSource messageSource() {
-        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setDefaultLocale(Locale.ENGLISH);
-        messageSource.setBasename("classpath:messages");
-        messageSource.setDefaultEncoding("UTF-8");
-
-        return messageSource;
-    }
-
-    @Bean
     public Map<String, String> messages() {
         Map<String, String> messages = new HashMap<>();
         Properties properties = new Properties();
 
-        try (FileInputStream fis = new FileInputStream("src/main/resources/messages.properties")) {
-            properties.load(fis);
-        } catch (IOException e) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("messages.properties")) {
+            properties.load(inputStream);
+        } catch (IOException | NullPointerException e) {
             log.error("Error: Unable to read messages from messages.properties");
             throw new Error(e);
         }
@@ -96,7 +83,7 @@ public class GoalMateApplication {
     @Bean
     public InlineKeyboardMarkup registerMarkup() {
         InlineKeyboardButton button = new InlineKeyboardButton("Start!");
-        button.setCallbackData("/register");
+        button.setCallbackData(Commands.REGISTER);
 
         return new InlineKeyboardMarkup(List.of(List.of(button)));
     }
@@ -104,15 +91,15 @@ public class GoalMateApplication {
     @Bean
     public InlineKeyboardMarkup menuMarkup() {
         InlineKeyboardButton newGoal = new InlineKeyboardButton("New goal");
-        newGoal.setCallbackData("/createNewGoal");
+        newGoal.setCallbackData(Commands.CREATE_NEW_GOAL);
 
-        InlineKeyboardButton completeGoal = new InlineKeyboardButton("Complete goal");
-        completeGoal.setCallbackData("/completeGoal");
+        InlineKeyboardButton editGoal = new InlineKeyboardButton("Edit goal");
+        editGoal.setCallbackData(Commands.SHOW_GOAL_LIST);
 
         InlineKeyboardButton provideStatistics = new InlineKeyboardButton("See statistics");
-        provideStatistics.setCallbackData("/provideStat");
+        provideStatistics.setCallbackData(Commands.PROVIDE_STATISTICS);
 
-        return new InlineKeyboardMarkup(List.of(List.of(newGoal), List.of(completeGoal), List.of(provideStatistics)));
+        return new InlineKeyboardMarkup(List.of(List.of(newGoal), List.of(editGoal), List.of(provideStatistics)));
     }
 
     @Bean
@@ -124,11 +111,5 @@ public class GoalMateApplication {
         halfOfYear.setCallbackData("6");
 
         return new InlineKeyboardMarkup(List.of(List.of(year), List.of(halfOfYear)));
-    }
-
-    @Bean
-    @Scope(value = "prototype")
-    public List<InlineKeyboardMarkup> allMarkups() {
-        return new ArrayList<>(applicationContext.getBeansOfType(InlineKeyboardMarkup.class).values());
     }
 }

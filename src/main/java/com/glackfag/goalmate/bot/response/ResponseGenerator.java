@@ -1,6 +1,9 @@
 package com.glackfag.goalmate.bot.response;
 
+import com.glackfag.goalmate.Commands;
 import com.glackfag.goalmate.bot.action.Action;
+import com.glackfag.goalmate.models.Goal;
+import com.glackfag.goalmate.services.GoalsService;
 import com.glackfag.goalmate.util.UpdateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,47 +21,83 @@ import java.util.Map;
 public class ResponseGenerator {
     private final Map<String, String> messages;
     private final MarkupSetter markupSetter;
+    private final GoalsService goalsService;
 
     public ResponseGenerator(@Qualifier("messages") Map<String, String> messages,
-                             ApplicationContext applicationContext) {
+                             ApplicationContext applicationContext,
+                             GoalsService goalsService, MarkupFormer markupFormer) {
         this.messages = messages;
-        markupSetter = new MarkupSetter(applicationContext);
+        this.goalsService = goalsService;
+        markupSetter = new MarkupSetter(applicationContext, goalsService, markupFormer);
     }
-
 
     public BotApiMethodMessage generate(Update update, Action action) {
         String chatId = UpdateUtils.extractChatId(update).toString();
-        String actionAsString = action.toString();
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
-        SendMessage sendMessage = new SendMessage(chatId, messages.get(actionAsString));
+        String messageText = prepareText(update, action);
+        SendMessage sendMessage = new SendMessage(chatId, messageText);
 
         switch (action) {
             case SEND_GREETINGS -> markupSetter.setRegisterMarkup(sendMessage);
             case SHOW_MENU -> markupSetter.setMenuMarkup(sendMessage);
             case SEND_NEW_GOAL_TIMEFRAME_FORM -> markupSetter.setTimeframeInstructionMarkup(sendMessage);
-            case SEND_NEW_GOAL_ESSENCE_FORM, SEND_RETRY, SEND_ERROR_MESSAGE, REGISTER -> {
+            case SHOW_GOAL_LIST -> markupSetter.setGoalsListMarkup(sendMessage, UpdateUtils.extractUserId(update));
+            case SHOW_GOAL_DESCRIPTION -> {
+                String goalId = callbackDataText.replaceFirst(Commands.SHOW_GOAL_DESCRIPTION, "");
+                markupSetter.setEditOptionsMarkup(sendMessage, Long.parseLong(goalId));
             }
 
-            default -> throw new Error("Error: Unable to find '" + action + "' in messages.properties");
+            case SEND_NEW_GOAL_ESSENCE_FORM, SEND_RETRY, SEND_ERROR_MESSAGE, REGISTER, SHOW_NO_GOALS_MESSAGE -> {
+            }
         }
+
+        sendMessage.setParseMode("Markdown");
         return sendMessage;
     }
 
-    private record MarkupSetter(ApplicationContext applicationContext) {
+    private String prepareText(Update update, Action action) {
+        String text = messages.get(action.toString());
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
+        switch (action) {
+            case SHOW_GOAL_DESCRIPTION -> {
+                String goalId = callbackDataText.replaceFirst(Commands.SHOW_GOAL_DESCRIPTION, "");
+                Goal goal = goalsService.findOne(Long.parseLong(goalId));
+                text = String.format(text, goal.getEssence(), goal.getExpiredDate(),  goal.getCreationDate(), goal.getTimeframe(), goal.getState());
+            }
+        }
+
+        if (text == null)
+            throw new Error("Error: Unable to find '" + action + "' in messages.properties");
+
+        return text;
+    }
+
+    private record MarkupSetter(ApplicationContext applicationContext, GoalsService goalsService,
+                                MarkupFormer markupFormer) {
         public void setRegisterMarkup(SendMessage sendMessage) {
             InlineKeyboardMarkup markup = (InlineKeyboardMarkup) applicationContext.getBean("registerMarkup");
             sendMessage.setReplyMarkup(markup);
         }
 
-        private void setTimeframeInstructionMarkup(SendMessage sendMessage) {
+        public void setTimeframeInstructionMarkup(SendMessage sendMessage) {
             InlineKeyboardMarkup markup = (InlineKeyboardMarkup) applicationContext.getBean("timeframeInstructionMarkup");
             sendMessage.setReplyMarkup(markup);
         }
 
-        private void setMenuMarkup(SendMessage sendMessage) {
+        public void setMenuMarkup(SendMessage sendMessage) {
             InlineKeyboardMarkup markup = (InlineKeyboardMarkup) applicationContext.getBean("menuMarkup");
             sendMessage.setReplyMarkup(markup);
         }
+
+        public void setEditOptionsMarkup(SendMessage sendMessage, long goalId) {
+            sendMessage.setReplyMarkup(markupFormer.formEditOptionsMarkup(goalId));
+        }
+
+        public void setGoalsListMarkup(SendMessage sendMessage, long userId) {
+            sendMessage.setReplyMarkup(markupFormer.fromGoalListMarkup(userId));
+        }
+
     }
 }

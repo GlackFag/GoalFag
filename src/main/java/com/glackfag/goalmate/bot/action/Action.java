@@ -9,15 +9,18 @@ public enum Action {
     SEND_NEW_GOAL_ESSENCE_FORM,
     SEND_NEW_GOAL_TIMEFRAME_FORM,
     SAVE_GOAL,
+    SHOW_GOAL_LIST,
+    SHOW_NO_GOALS_MESSAGE,
+    SHOW_GOAL_DESCRIPTION,
     FINISH_GOAL,
     DELETE_GOAL,
     FAIL_GOAL,
     PROVIDE_STATISTICS,
     SEND_ERROR_MESSAGE,
-    SEND_RETRY;
+    SEND_RETRY,
+    NOTHING;
 
     /**
-     *
      * @return Enum element's name in camelCase
      */
     @Override

@@ -18,7 +18,7 @@ public class Goal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Getter
     @Setter
@@ -30,6 +30,11 @@ public class Goal {
     @ManyToOne
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person creator;
+
+    @Getter
+    @Setter
+    @Column(name = "person_id", insertable=false, updatable=false)
+    private Long personId;
 
     @Getter
     @Setter
@@ -53,7 +58,7 @@ public class Goal {
     @Enumerated(value = EnumType.STRING)
     private TimeframeType timeframe;
 
-    public Goal(Integer id, String essence, Person creator) {
+    public Goal(Long id, String essence, Person creator) {
         this.id = id;
         this.essence = essence;
         this.creator = creator;

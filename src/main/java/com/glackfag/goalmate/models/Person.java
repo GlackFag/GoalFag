@@ -12,9 +12,6 @@ import java.util.Map;
 @Entity
 @Table(name = "person")
 public class Person {
-    @Transient
-    private final int UNINITIALIZED_ID = -1;
-
     @Getter
     @Setter
     @Id
@@ -27,15 +24,10 @@ public class Person {
     @Column(name = "user_id")
     private Long userId;
 
-    @Getter
-    @Setter
     @OneToMany(mappedBy = "creator")
-    private List<Goal> goals;
-
     @Getter
     @Setter
-    @Transient
-    private int chatId = UNINITIALIZED_ID;
+    private List<Goal> goals;
 
     @Transient
     private static final Map<Long, Action> lastAction = new AutoDeletingConcurrentHashMap<>(600_000L);
@@ -64,8 +56,7 @@ public class Person {
     public String toString() {
         return "Person{" +
                 "id=" + id +
-                ", userId='" + userId + '\'' +
-                ", goals=" + goals +
+                ", userId=" + userId +
                 '}';
     }
 }

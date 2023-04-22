@@ -1,11 +1,11 @@
 package com.glackfag.goalmate.bot.action;
 
+import com.glackfag.goalmate.Commands;
 import com.glackfag.goalmate.models.Person;
 import com.glackfag.goalmate.services.PeopleService;
 import com.glackfag.goalmate.util.UpdateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
@@ -23,6 +23,16 @@ public class ActionRecognizer {
                 return Action.REGISTER;
             if (isSendNewGoalEssenceForm(update))
                 return Action.SEND_NEW_GOAL_ESSENCE_FORM;
+            if (isShowGoalList(update))
+                return Action.SHOW_GOAL_LIST;
+            if (isShowGoalDescription(update))
+                return Action.SHOW_GOAL_DESCRIPTION;
+            if (isFinishGoal(update))
+                return Action.FINISH_GOAL;
+            if (isFailGoal(update))
+                return Action.FAIL_GOAL;
+            if (isDeleteGoal(update))
+                return Action.DELETE_GOAL;
         } else {
             if (isShowMenu(update))
                 return Action.SHOW_MENU;
@@ -34,41 +44,70 @@ public class ActionRecognizer {
         if (isSaveGoal(update))
             return Action.SAVE_GOAL;
 
-        return Action.SHOW_MENU;
+        return Action.NOTHING;
     }
 
     private boolean isSendGreetings(Update update) {
         Long userId = UpdateUtils.extractUserId(update);
-        Message message = update.getMessage();
+        String userInput = UpdateUtils.extractUserInput(update);
 
-        if (!peopleService.isUserIdRegistered(userId))
-            return message.getText().equalsIgnoreCase("/start");
-
-        return false;
+        return userInput.equalsIgnoreCase(Commands.START) && !peopleService.isUserIdRegistered(userId);
     }
-
 
     private boolean isRegister(Update update) {
         if (!update.hasCallbackQuery())
             return false;
 
         Long userId = UpdateUtils.extractUserId(update);
-        String text = UpdateUtils.extractCallbackDataText(update);
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
-        return text.equals("/register") && !peopleService.isUserIdRegistered(userId);
+        return callbackDataText.equals(Commands.REGISTER) && !peopleService.isUserIdRegistered(userId);
     }
 
     private boolean isShowMenu(Update update) {
-        return !update.hasCallbackQuery() && UpdateUtils.extractUserInput(update).equals("/menu");
+        String userInput = UpdateUtils.extractUserInput(update);
+
+        return !update.hasCallbackQuery() &&
+                (userInput.equals(Commands.MENU) || userInput.equalsIgnoreCase(Commands.CANCEL));
+    }
+
+    private boolean isShowGoalList(Update update) {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
+        return callbackDataText.equals(Commands.SHOW_GOAL_LIST);
+    }
+
+    private boolean isShowGoalDescription(Update update) {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
+        return callbackDataText.startsWith(Commands.SHOW_GOAL_DESCRIPTION);
+    }
+
+    private boolean isFinishGoal(Update update) {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
+        return callbackDataText.startsWith(Commands.FINISH_GOAL);
+    }
+
+    private boolean isFailGoal(Update update) {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
+        return callbackDataText.startsWith(Commands.FAIL_GOAL);
+    }
+
+    private boolean isDeleteGoal(Update update) {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
+        return callbackDataText.startsWith(Commands.DELETE_GOAL);
     }
 
     private boolean isSendNewGoalEssenceForm(Update update) {
         if (!update.hasCallbackQuery())
             return false;
 
-        String text = UpdateUtils.extractCallbackDataText(update);
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
-        return text.equals("/createNewGoal");
+        return callbackDataText.equals(Commands.CREATE_NEW_GOAL);
     }
 
     private boolean isSendNewGoalTimeframeForm(Update update) {
@@ -76,13 +115,13 @@ public class ActionRecognizer {
         Action lastAction = Person.getLastAction(UpdateUtils.extractUserId(update));
 
         return !update.hasCallbackQuery() && lastAction == Action.SEND_NEW_GOAL_ESSENCE_FORM &&
-                !userInput.equalsIgnoreCase("cancel");
+                !userInput.equalsIgnoreCase(Commands.CANCEL);
     }
 
     private boolean isSaveGoal(Update update) {
         Long userId = UpdateUtils.extractUserId(update);
         String userInput = UpdateUtils.extractUserInput(update);
 
-        return Person.getLastAction(userId) == Action.SEND_NEW_GOAL_TIMEFRAME_FORM && !userInput.equalsIgnoreCase("cancel");
+        return Person.getLastAction(userId) == Action.SEND_NEW_GOAL_TIMEFRAME_FORM && !userInput.equalsIgnoreCase(Commands.CANCEL);
     }
 }
