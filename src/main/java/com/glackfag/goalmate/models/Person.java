@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +25,20 @@ public class Person {
     @Column(name = "user_id")
     private Long userId;
 
-    @OneToMany(mappedBy = "creator")
+    @Setter
+    @Getter
+    @Column(name = "chat_id")
+    private Long chatId;
+
     @Getter
     @Setter
+    @OneToMany(mappedBy = "creator")
     private List<Goal> goals;
+
+    @Setter
+    @Getter
+    @Column(name = "last_converse_date")
+    private Date lastConverseDate;
 
     @Transient
     private static final Map<Long, Action> lastAction = new AutoDeletingConcurrentHashMap<>(600_000L);

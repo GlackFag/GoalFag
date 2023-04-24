@@ -50,6 +50,7 @@ public class ActionExecutor {
         Action lastAction = Person.getLastAction(userId);
 
         messageEditor.removeInlineMarkup(update);
+
         try {
             Person.updateLastAction(userId, action);
             switch (action) {
@@ -72,11 +73,15 @@ public class ActionExecutor {
             log.warn(e.getMessage());
             throw new RuntimeException(e);
         }
+
+        peopleService.updateLastConverseDate(userId);
     }
 
     private void register(Update update) throws TelegramApiException {
         Long userId = UpdateUtils.extractUserId(update);
         Person person = new Person(userId);
+
+        person.setChatId(UpdateUtils.extractChatId(update));
 
         peopleService.save(person);
         bot.execute(responseGenerator.generate(update, Action.SHOW_MENU));

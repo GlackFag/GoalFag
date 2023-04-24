@@ -66,9 +66,11 @@ public class ActionRecognizer {
 
     private boolean isShowMenu(Update update) {
         String userInput = UpdateUtils.extractUserInput(update);
+        long userId = UpdateUtils.extractUserId(update);
 
-        return !update.hasCallbackQuery() &&
-                (userInput.equals(Commands.MENU) || userInput.equalsIgnoreCase(Commands.CANCEL));
+        return (userInput.equals(Commands.MENU) || userInput.equalsIgnoreCase(Commands.CANCEL) ||
+                userInput.equals(Commands.START)) && !update.hasCallbackQuery() &&
+                peopleService.isUserIdRegistered(userId);
     }
 
     private boolean isShowGoalList(Update update) {

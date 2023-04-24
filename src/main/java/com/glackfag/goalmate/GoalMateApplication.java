@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -47,6 +46,11 @@ public class GoalMateApplication {
     @Bean
     public String token() {
         return environment.getRequiredProperty("bot.token");
+    }
+
+    @Bean
+    public String reminderText(){
+        return environment.getRequiredProperty("message.reminder");
     }
 
     @Bean

@@ -16,7 +16,7 @@ public class AutoDeletingConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V>
     private Long timeout;
 
     public AutoDeletingConcurrentHashMap(@NonNull Long timeout) {
-        timer = new Timer();
+        timer = new Timer(true);
         this.timeout = timeout;
     }
 
@@ -27,7 +27,7 @@ public class AutoDeletingConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V>
             public void run() {
                 remove(key);
             }
-        }, timeout);
+        }, timeout, timeout);
 
         return super.put(key, value);
     }
