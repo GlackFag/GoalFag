@@ -1,6 +1,6 @@
 package com.glackfag.goalmate.bot.action;
 
-import com.glackfag.goalmate.Commands;
+import com.glackfag.goalmate.util.Commands;
 import com.glackfag.goalmate.models.Person;
 import com.glackfag.goalmate.services.PeopleService;
 import com.glackfag.goalmate.util.UpdateUtils;
@@ -33,6 +33,8 @@ public class ActionRecognizer {
                 return Action.FAIL_GOAL;
             if (isDeleteGoal(update))
                 return Action.DELETE_GOAL;
+            if (isProvideStatistics(update))
+                return Action.PROVIDE_STATISTICS;
         } else {
             if (isShowMenu(update))
                 return Action.SHOW_MENU;
@@ -71,6 +73,13 @@ public class ActionRecognizer {
         return (userInput.equals(Commands.MENU) || userInput.equalsIgnoreCase(Commands.CANCEL) ||
                 userInput.equals(Commands.START)) && !update.hasCallbackQuery() &&
                 peopleService.isUserIdRegistered(userId);
+    }
+
+    private boolean isProvideStatistics(Update update) {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+        long userId = UpdateUtils.extractUserId(update);
+
+        return callbackDataText.equals(Commands.PROVIDE_STATISTICS) && peopleService.isUserIdRegistered(userId);
     }
 
     private boolean isShowGoalList(Update update) {

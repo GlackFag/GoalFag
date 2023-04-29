@@ -1,8 +1,8 @@
 package com.glackfag.goalmate.bot;
 
 import com.glackfag.goalmate.bot.action.Action;
-import com.glackfag.goalmate.bot.action.ActionRecognizer;
 import com.glackfag.goalmate.bot.action.ActionExecutor;
+import com.glackfag.goalmate.bot.action.ActionRecognizer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -55,5 +56,9 @@ public class Bot extends TelegramLongPollingBot {
             log.error(e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void sendPhoto(SendPhoto photo) throws TelegramApiException {
+        execute(photo);
     }
 }

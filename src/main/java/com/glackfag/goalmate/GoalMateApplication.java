@@ -1,5 +1,6 @@
 package com.glackfag.goalmate;
 
+import com.glackfag.goalmate.util.Commands;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -62,6 +63,12 @@ public class GoalMateApplication {
             throw new Error(e);
         }
     }
+
+//    @Bean
+//    public DefaultBotOptions botOptions(){
+//
+//
+//    }
 
     @Bean
     public Map<String, String> messages() {

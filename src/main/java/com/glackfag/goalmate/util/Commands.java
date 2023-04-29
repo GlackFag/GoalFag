@@ -1,4 +1,4 @@
-package com.glackfag.goalmate;
+package com.glackfag.goalmate.util;
 
 public interface Commands {
     String REGISTER = "/register";

@@ -1,6 +1,6 @@
 package com.glackfag.goalmate.bot.response;
 
-import com.glackfag.goalmate.Commands;
+import com.glackfag.goalmate.util.Commands;
 import com.glackfag.goalmate.models.Goal;
 import com.glackfag.goalmate.models.Person;
 import com.glackfag.goalmate.services.PeopleService;

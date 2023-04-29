@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface PeopleRepository extends JpaRepository<Person, Integer> {
-    Optional<Person> findByUserId(long chatId);
+    Optional<Person> findByUserId(long userId);
 
     List<Person> findByLastConverseDateBefore(Date date);
 }

@@ -1,6 +1,6 @@
 package com.glackfag.goalmate.bot.action;
 
-import com.glackfag.goalmate.Commands;
+import com.glackfag.goalmate.util.Commands;
 import com.glackfag.goalmate.bot.Bot;
 import com.glackfag.goalmate.bot.GoalFormer;
 import com.glackfag.goalmate.bot.response.MessageEditor;
@@ -54,7 +54,8 @@ public class ActionExecutor {
         try {
             Person.updateLastAction(userId, action);
             switch (action) {
-                case NOTHING -> {}
+                case NOTHING -> {
+                }
                 case REGISTER -> register(update);
                 case SEND_NEW_GOAL_TIMEFRAME_FORM -> sendNewGoalTimeframeForm(update);
                 case SAVE_GOAL -> saveGoal(update);
@@ -62,6 +63,7 @@ public class ActionExecutor {
                 case FINISH_GOAL -> finishGoal(update);
                 case FAIL_GOAL -> failGoal(update);
                 case DELETE_GOAL -> deleteGoal(update);
+                case PROVIDE_STATISTICS -> provideStatistics(update);
 
                 default -> bot.execute(responseGenerator.generate(update, action));
             }
@@ -74,7 +76,8 @@ public class ActionExecutor {
             throw new RuntimeException(e);
         }
 
-        peopleService.updateLastConverseDate(userId);
+        if (peopleService.isUserIdRegistered(UpdateUtils.extractUserId(update)))
+            peopleService.updateLastConverseDate(userId);
     }
 
     private void register(Update update) throws TelegramApiException {
@@ -85,6 +88,12 @@ public class ActionExecutor {
 
         peopleService.save(person);
         bot.execute(responseGenerator.generate(update, Action.SHOW_MENU));
+    }
+
+    private void provideStatistics(Update update) throws TelegramApiException {
+        bot.sendPhoto(responseGenerator.generatePiePlot(UpdateUtils.extractUserId(update),
+                UpdateUtils.extractChatId(update)));
+        showMenu(update);
     }
 
     private void showGoalList(Update update) throws TelegramApiException {
@@ -136,7 +145,9 @@ public class ActionExecutor {
 
     private void sendErrorMessage(Update update) throws TelegramApiException {
         bot.execute(responseGenerator.generate(update, Action.SEND_ERROR_MESSAGE));
-        showMenu(update);
+
+        if (peopleService.isUserIdRegistered(UpdateUtils.extractUserId(update)))
+            showMenu(update);
     }
 
     private void showMenu(Update update) throws TelegramApiException {
