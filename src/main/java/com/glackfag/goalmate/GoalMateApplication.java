@@ -64,12 +64,6 @@ public class GoalMateApplication {
         }
     }
 
-//    @Bean
-//    public DefaultBotOptions botOptions(){
-//
-//
-//    }
-
     @Bean
     public Map<String, String> messages() {
         Map<String, String> messages = new HashMap<>();
