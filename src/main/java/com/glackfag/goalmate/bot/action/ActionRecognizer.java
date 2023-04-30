@@ -35,14 +35,16 @@ public class ActionRecognizer {
                 return Action.DELETE_GOAL;
             if (isProvideStatistics(update))
                 return Action.PROVIDE_STATISTICS;
+            if(isSetEditOptionsMarkup(update))
+                return Action.SET_EDIT_OPTIONS_MARKUP;
         } else {
-            if (isShowMenu(update))
-                return Action.SHOW_MENU;
             if (isSendGreetings(update))
                 return Action.SEND_GREETINGS;
             if (isSendNewGoalTimeframeForm(update))
                 return Action.SEND_NEW_GOAL_TIMEFRAME_FORM;
         }
+        if (isShowMenu(update))
+            return Action.SHOW_MENU;
         if (isSaveGoal(update))
             return Action.SAVE_GOAL;
 
@@ -68,10 +70,11 @@ public class ActionRecognizer {
 
     private boolean isShowMenu(Update update) {
         String userInput = UpdateUtils.extractUserInput(update);
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
         long userId = UpdateUtils.extractUserId(update);
 
         return (userInput.equals(Commands.MENU) || userInput.equalsIgnoreCase(Commands.CANCEL) ||
-                userInput.equals(Commands.START)) && !update.hasCallbackQuery() &&
+                userInput.equals(Commands.START) || callbackDataText.equals(Commands.MENU)) &&
                 peopleService.isUserIdRegistered(userId);
     }
 
@@ -92,6 +95,12 @@ public class ActionRecognizer {
         String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
         return callbackDataText.startsWith(Commands.SHOW_GOAL_DESCRIPTION);
+    }
+
+    private boolean isSetEditOptionsMarkup(Update update){
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
+        return callbackDataText.startsWith(Commands.SET_EDIT_OPTIONS_MARKUP);
     }
 
     private boolean isFinishGoal(Update update) {

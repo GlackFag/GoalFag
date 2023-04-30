@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 @Component
@@ -44,5 +45,17 @@ public class MessageEditor {
             bot.execute(editMessage);
         } catch (TelegramApiException ignored) {
         }
+    }
+
+    public void changeMarkup(Message message, InlineKeyboardMarkup newMarkup) throws TelegramApiException{
+
+        EditMessageText editMessageText = new EditMessageText();
+
+        editMessageText.setMessageId(message.getMessageId());
+        editMessageText.setChatId(message.getChatId());
+        editMessageText.setReplyMarkup(newMarkup);
+        editMessageText.setText(message.getText());
+
+        bot.execute(editMessageText);
     }
 }

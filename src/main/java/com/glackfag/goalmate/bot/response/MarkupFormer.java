@@ -2,7 +2,6 @@ package com.glackfag.goalmate.bot.response;
 
 import com.glackfag.goalmate.util.Commands;
 import com.glackfag.goalmate.models.Goal;
-import com.glackfag.goalmate.models.Person;
 import com.glackfag.goalmate.services.PeopleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-class MarkupFormer {
+public class MarkupFormer {
     private final PeopleService peopleService;
 
     @Autowired
@@ -23,25 +22,43 @@ class MarkupFormer {
     }
 
     @Transactional
-    InlineKeyboardMarkup fromGoalListMarkup(long userId) {
-        Person person = peopleService.findByUserId(userId);
-
-        List<Goal> goalList = person.getGoals();
+    InlineKeyboardMarkup fromGoalListMarkup(long userId) throws IllegalArgumentException {
+        List<Goal> goalList = peopleService.findByUserId(userId).getGoals();
 
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
-        for (Goal e : goalList) {
-            InlineKeyboardButton button = new InlineKeyboardButton();
+        List<InlineKeyboardButton> currentRow = new ArrayList<>();
 
-            button.setText(e.getEssence());
-            button.setCallbackData(Commands.SHOW_GOAL_DESCRIPTION + e.getId());
+        int listWidth = 2;
 
-            rows.add(List.of(button));
+        for (int i = 0; i < goalList.size(); i++) {
+
+            if (i % listWidth == 0) {
+                rows.add(currentRow);
+                currentRow = new ArrayList<>();
+            }
+
+            currentRow.add(makeButtonFromGoal(goalList.get(i)));
         }
+        rows.add(currentRow);
+
+        InlineKeyboardButton back = new InlineKeyboardButton("Back");
+        back.setCallbackData(Commands.MENU);
+
+        rows.add(List.of(back));
 
         return new InlineKeyboardMarkup(rows);
     }
 
-    InlineKeyboardMarkup formEditOptionsMarkup(long goalId){
+    private InlineKeyboardButton makeButtonFromGoal(Goal goal) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+
+        button.setText(goal.getEssence());
+        button.setCallbackData(Commands.SHOW_GOAL_DESCRIPTION + goal.getId());
+
+        return button;
+    }
+
+    public InlineKeyboardMarkup formEditOptionsMarkup(long goalId) {
         InlineKeyboardButton finish = new InlineKeyboardButton("Finish goal");
         finish.setCallbackData(Commands.FINISH_GOAL + goalId);
 
@@ -55,5 +72,15 @@ class MarkupFormer {
         back.setCallbackData(Commands.SHOW_GOAL_LIST);
 
         return new InlineKeyboardMarkup(List.of(List.of(finish), List.of(fail), List.of(delete), List.of(back)));
+    }
+
+    public InlineKeyboardMarkup formGoalDescriptionMarkup(long goalId){
+        InlineKeyboardButton changeState = new InlineKeyboardButton("Change state");
+        changeState.setCallbackData(Commands.SET_EDIT_OPTIONS_MARKUP + goalId);
+
+        InlineKeyboardButton back = new InlineKeyboardButton("Back");
+        back.setCallbackData(Commands.SHOW_GOAL_LIST);
+
+        return new InlineKeyboardMarkup(List.of(List.of(changeState), List.of(back)));
     }
 }

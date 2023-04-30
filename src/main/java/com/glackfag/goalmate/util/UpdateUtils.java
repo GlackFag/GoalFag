@@ -6,7 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 
 import java.util.List;
 
-public class UpdateUtils {
+public abstract class UpdateUtils {
     public static Long extractChatId(Update update) {
         Message m = update.getMessage();
         if (m != null)
@@ -54,6 +54,10 @@ public class UpdateUtils {
         return null;
     }
 
-    private UpdateUtils() {
+    public static Message extractMessage(Update update){
+        if(update.hasCallbackQuery())
+            return update.getCallbackQuery().getMessage();
+        else
+            return update.getMessage();
     }
 }

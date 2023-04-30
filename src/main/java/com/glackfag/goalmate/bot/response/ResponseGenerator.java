@@ -55,7 +55,7 @@ public class ResponseGenerator {
             case SHOW_GOAL_LIST -> markupSetter.setGoalsListMarkup(sendMessage, UpdateUtils.extractUserId(update));
             case SHOW_GOAL_DESCRIPTION -> {
                 String goalId = callbackDataText.replaceFirst(Commands.SHOW_GOAL_DESCRIPTION, "");
-                markupSetter.setEditOptionsMarkup(sendMessage, Long.parseLong(goalId));
+                markupSetter.setGoalDescriptionMarkup(sendMessage, Long.parseLong(goalId));
             }
 
             case SEND_NEW_GOAL_ESSENCE_FORM, SEND_RETRY, SEND_ERROR_MESSAGE, REGISTER, SHOW_NO_GOALS_MESSAGE -> {
@@ -115,8 +115,8 @@ public class ResponseGenerator {
             sendMessage.setReplyMarkup(markup);
         }
 
-        public void setEditOptionsMarkup(SendMessage sendMessage, long goalId) {
-            sendMessage.setReplyMarkup(markupFormer.formEditOptionsMarkup(goalId));
+        public void setGoalDescriptionMarkup(SendMessage sendMessage, long goalId) {
+            sendMessage.setReplyMarkup(markupFormer.formGoalDescriptionMarkup(goalId));
         }
 
         public void setGoalsListMarkup(SendMessage sendMessage, long userId) {

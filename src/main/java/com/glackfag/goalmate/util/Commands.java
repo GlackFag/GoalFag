@@ -9,6 +9,7 @@ public interface Commands {
     String START = "/start";
     String CANCEL = "Cancel";
     String SHOW_GOAL_DESCRIPTION = "/showGoalId=";
+    String SET_EDIT_OPTIONS_MARKUP = "/setEditOptionsMarkupGoalId=";
     String FINISH_GOAL = "/finishGoalId=";
     String FAIL_GOAL = "/failGoalId=";
     String DELETE_GOAL = "/deleteGoalId=";

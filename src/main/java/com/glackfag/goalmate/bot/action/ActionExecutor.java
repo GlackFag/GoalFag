@@ -1,5 +1,6 @@
 package com.glackfag.goalmate.bot.action;
 
+import com.glackfag.goalmate.bot.response.MarkupFormer;
 import com.glackfag.goalmate.util.Commands;
 import com.glackfag.goalmate.bot.Bot;
 import com.glackfag.goalmate.bot.GoalFormer;
@@ -31,16 +32,18 @@ public class ActionExecutor {
     private final ResponseGenerator responseGenerator;
     private final GoalFormer goalFormer;
     private final MessageEditor messageEditor;
+    private final MarkupFormer markupFormer;
     private Bot bot;
 
     @Autowired
     public ActionExecutor(PeopleService peopleService, GoalsService goalsService, GoalFormer goalFormer,
-                          ResponseGenerator responseGenerator, MessageEditor messageEditor, @Lazy Bot bot) {
+                          ResponseGenerator responseGenerator, MessageEditor messageEditor, MarkupFormer markupFormer, @Lazy Bot bot) {
         this.peopleService = peopleService;
         this.goalsService = goalsService;
         this.goalFormer = goalFormer;
         this.responseGenerator = responseGenerator;
         this.messageEditor = messageEditor;
+        this.markupFormer = markupFormer;
         this.bot = bot;
     }
 
@@ -49,7 +52,8 @@ public class ActionExecutor {
         Long userId = UpdateUtils.extractUserId(update);
         Action lastAction = Person.getLastAction(userId);
 
-        messageEditor.removeInlineMarkup(update);
+        if (action != Action.SET_EDIT_OPTIONS_MARKUP)
+            messageEditor.removeInlineMarkup(update);
 
         try {
             Person.updateLastAction(userId, action);
@@ -60,6 +64,7 @@ public class ActionExecutor {
                 case SEND_NEW_GOAL_TIMEFRAME_FORM -> sendNewGoalTimeframeForm(update);
                 case SAVE_GOAL -> saveGoal(update);
                 case SHOW_GOAL_LIST -> showGoalList(update);
+                case SET_EDIT_OPTIONS_MARKUP -> setEditOptionsMarkup(update);
                 case FINISH_GOAL -> finishGoal(update);
                 case FAIL_GOAL -> failGoal(update);
                 case DELETE_GOAL -> deleteGoal(update);
@@ -107,6 +112,13 @@ public class ActionExecutor {
         }
     }
 
+    private void setEditOptionsMarkup(Update update) throws TelegramApiException {
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+        long goalId = Long.parseLong(callbackDataText.replaceFirst(Commands.SET_EDIT_OPTIONS_MARKUP, ""));
+
+        messageEditor.changeMarkup(UpdateUtils.extractMessage(update), markupFormer.formEditOptionsMarkup(goalId));
+    }
+
     private void finishGoal(Update update) throws Exception {
         String callbackDataText = UpdateUtils.extractCallbackDataText(update);
         callbackDataText = callbackDataText.replaceFirst(Commands.FINISH_GOAL, "");
@@ -122,7 +134,7 @@ public class ActionExecutor {
 
     private void failGoal(Update update) throws Exception {
         String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-        callbackDataText = callbackDataText.replaceFirst(Commands.FINISH_GOAL, "");
+        callbackDataText = callbackDataText.replaceFirst(Commands.FAIL_GOAL, "");
 
         long goalId = Long.parseLong(callbackDataText);
 
