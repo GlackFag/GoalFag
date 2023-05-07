@@ -9,10 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
-class DatasetFormer {
+public class DatasetFormer {
     private final PeopleService peopleService;
 
     @Autowired
@@ -21,10 +22,30 @@ class DatasetFormer {
     }
 
     @Transactional
-    DefaultPieDataset<String> formPieDatasetByUserId(long userId) {
+    public DefaultPieDataset<String> formAllTimePieDatasetByUserId(long userId) {
         Person person = peopleService.findByUserId(userId);
         List<Goal> goalList = person.getGoals();
 
+        return formDataSet(goalList);
+    }
+
+    @Transactional
+    public DefaultPieDataset<String> formYearPieDatasetByUserId(long userId) {
+        Person person = peopleService.findByUserId(userId);
+        List<Goal> goalList = person.getGoals();
+
+        goalList.removeIf(x -> !isGoalForThisYear(x));
+
+        return formDataSet(goalList);
+    }
+
+    private static boolean isGoalForThisYear(Goal goal) {
+        int currentYear = LocalDate.now().getYear();
+        return goal.getCreationDate().getYear() == currentYear &&
+                goal.getExpiredDate().getYear() == currentYear;
+    }
+
+    public DefaultPieDataset<String> formDataSet(List<Goal> goalList) {
         DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
 
         dataset.setValue(GoalState.FINISHED.toString(),

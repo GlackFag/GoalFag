@@ -1,6 +1,7 @@
 package com.glackfag.goalmate.bot.action;
 
 import com.glackfag.goalmate.bot.response.MarkupFormer;
+import com.glackfag.goalmate.statistics.DatasetFormer;
 import com.glackfag.goalmate.util.Commands;
 import com.glackfag.goalmate.bot.Bot;
 import com.glackfag.goalmate.bot.GoalFormer;
@@ -13,6 +14,7 @@ import com.glackfag.goalmate.services.GoalsService;
 import com.glackfag.goalmate.services.PeopleService;
 import com.glackfag.goalmate.util.UpdateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.jfree.data.general.PieDataset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -33,17 +35,19 @@ public class ActionExecutor {
     private final GoalFormer goalFormer;
     private final MessageEditor messageEditor;
     private final MarkupFormer markupFormer;
+    private final DatasetFormer datasetFormer;
     private Bot bot;
 
     @Autowired
     public ActionExecutor(PeopleService peopleService, GoalsService goalsService, GoalFormer goalFormer,
-                          ResponseGenerator responseGenerator, MessageEditor messageEditor, MarkupFormer markupFormer, @Lazy Bot bot) {
+                          ResponseGenerator responseGenerator, MessageEditor messageEditor, MarkupFormer markupFormer, DatasetFormer datasetFormer, @Lazy Bot bot) {
         this.peopleService = peopleService;
         this.goalsService = goalsService;
         this.goalFormer = goalFormer;
         this.responseGenerator = responseGenerator;
         this.messageEditor = messageEditor;
         this.markupFormer = markupFormer;
+        this.datasetFormer = datasetFormer;
         this.bot = bot;
     }
 
@@ -96,8 +100,11 @@ public class ActionExecutor {
     }
 
     private void provideStatistics(Update update) throws TelegramApiException {
-        bot.sendPhoto(responseGenerator.generatePiePlot(UpdateUtils.extractUserId(update),
-                UpdateUtils.extractChatId(update)));
+        long userId = UpdateUtils.extractUserId(update);
+        PieDataset<String> dataset = datasetFormer.formAllTimePieDatasetByUserId(userId);
+
+        bot.sendPhoto(responseGenerator.generateSendPhotoWithPiePlot(UpdateUtils.extractUserId(update),
+                dataset));
         showMenu(update);
     }
 

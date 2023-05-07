@@ -9,6 +9,7 @@ import com.glackfag.goalmate.util.UpdateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
+import org.jfree.data.general.PieDataset;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -82,8 +83,8 @@ public class ResponseGenerator {
         return text;
     }
 
-    public SendPhoto generatePiePlot(Long userId, Long chatId) {
-        JFreeChart chart = chartFormer.formPieChart(userId);
+    public SendPhoto generateSendPhotoWithPiePlot(Long chatId, PieDataset<String> dataset) {
+        JFreeChart chart = chartFormer.formPieChartFromDataset(dataset);
 
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

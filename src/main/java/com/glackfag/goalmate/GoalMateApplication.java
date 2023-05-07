@@ -98,7 +98,7 @@ public class GoalMateApplication {
         InlineKeyboardButton newGoal = new InlineKeyboardButton("New goal");
         newGoal.setCallbackData(Commands.CREATE_NEW_GOAL);
 
-        InlineKeyboardButton editGoal = new InlineKeyboardButton("Edit goal");
+        InlineKeyboardButton editGoal = new InlineKeyboardButton("See goals");
         editGoal.setCallbackData(Commands.SHOW_GOAL_LIST);
 
         InlineKeyboardButton provideStatistics = new InlineKeyboardButton("See statistics");

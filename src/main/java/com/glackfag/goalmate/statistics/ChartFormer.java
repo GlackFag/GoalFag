@@ -3,21 +3,11 @@ package com.glackfag.goalmate.statistics;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.PieDataset;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ChartFormer {
-    private final DatasetFormer datasetFormer;
-
-    @Autowired
-    public ChartFormer(DatasetFormer datasetFormer) {
-        this.datasetFormer = datasetFormer;
-    }
-
-    public JFreeChart formPieChart(Long userId){
-        PieDataset<String> dataset = datasetFormer.formPieDatasetByUserId(userId);
-
+    public JFreeChart formPieChartFromDataset(PieDataset<String> dataset) {
         JFreeChart chart = ChartFactory.createPieChart(
                 "Goals state", // chart title
                 dataset, // data

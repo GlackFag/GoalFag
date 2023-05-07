@@ -3,6 +3,7 @@ package com.glackfag.goalmate.bot.reminder;
 import com.glackfag.goalmate.bot.Bot;
 import com.glackfag.goalmate.models.Person;
 import com.glackfag.goalmate.services.PeopleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.TimerTask;
 
 @Component
+@Slf4j
 class NotifyOrDeletePeopleTask extends TimerTask {
     private final PeopleService peopleService;
     private final Bot bot;
@@ -32,19 +34,28 @@ class NotifyOrDeletePeopleTask extends TimerTask {
     public void run() {
         List<Person> lastMessageYearAgo = peopleService.findNotWrittenLongTime();
 
-        Date yearAgo = Date.valueOf(LocalDate.now().minusDays(365));
-
         for (Person e : lastMessageYearAgo) {
-            if (e.getLastConverseDate().before(yearAgo))
+            Date lastConverseDate = e.getLastConverseDate();
+
+            if (isDeleteDate(lastConverseDate))
                 peopleService.delete(e);
-            else {
+            else if (isRemindDate(lastConverseDate)) {
                 try {
                     bot.execute(new SendMessage(e.getChatId().toString(), reminderText));
                 } catch (TelegramApiException ex) {
+                    log.warn(ex.getMessage());
                     throw new RuntimeException(ex);
                 }
             }
         }
 
+    }
+
+    private boolean isDeleteDate(Date lastConverseDate) {
+        return lastConverseDate.before(Date.valueOf(LocalDate.now().minusDays(365)));
+    }
+
+    private boolean isRemindDate(Date lastConverseDate) {
+        return lastConverseDate.before(Date.valueOf(LocalDate.now().minusDays(364)));
     }
 }

@@ -23,37 +23,41 @@ public class PeopleService {
         this.goalsService = goalsService;
     }
 
-    public Person findByUserId(long userId){
+    public List<Person> findAll() {
+        return repository.findAll();
+    }
+
+    public Person findByUserId(long userId) {
         return repository.findByUserId(userId).orElse(null);
     }
 
-    public boolean isUserIdRegistered(long userId){
+    public boolean isUserIdRegistered(long userId) {
         return findByUserId(userId) != null;
     }
 
-    public boolean hasGoals(long userId){
+    public boolean hasGoals(long userId) {
         return goalsService.hasGoals(userId);
     }
 
-    public List<Person> findNotWrittenLongTime(){
+    public List<Person> findNotWrittenLongTime() {
         Date yearAgo = Date.valueOf(LocalDate.now().minusDays(364));
 
         return repository.findByLastConverseDateBefore(yearAgo);
     }
 
     @Transactional
-    public void updateLastConverseDate(long userId){
+    public void updateLastConverseDate(long userId) {
         Person person = findByUserId(userId);
         person.setLastConverseDate(Date.valueOf(LocalDate.now()));
     }
 
     @Transactional
-    public void save(Person person){
+    public void save(Person person) {
         repository.save(person);
     }
 
     @Transactional
-    public void delete(Person person){
+    public void delete(Person person) {
         repository.delete(person);
     }
 
