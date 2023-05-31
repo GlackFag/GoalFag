@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.glackfag</groupId>
-    <artifactId>GoalMate</artifactId>
+    <artifactId>GoalFag</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>GoalMate</name>
+    <name>GoalFag</name>
     <description>Goal tracker telegram bot</description>
     <properties>
         <java.version>17</java.version>

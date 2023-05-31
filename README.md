@@ -1,4 +1,4 @@
-# GoalMate
+# GoalFag
 Goal tracking bot
 
-https://t.me/goalmatebot
+https://t.me/goalFag_bot
