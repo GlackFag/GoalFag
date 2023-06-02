@@ -14,7 +14,6 @@ import com.glackfag.goalfag.services.GoalsService;
 import com.glackfag.goalfag.services.PeopleService;
 import com.glackfag.goalfag.util.UpdateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jfree.data.general.PieDataset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -24,6 +23,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -101,7 +101,7 @@ public class ActionExecutor {
 
     private void provideStatistics(Update update) throws TelegramApiException {
         long userId = UpdateUtils.extractUserId(update);
-        PieDataset<String> dataset = datasetFormer.formAllTimePieDatasetByUserId(userId);
+        Map<String, Integer> dataset = datasetFormer.formAllTimePieDatasetByUserId(userId);
 
         bot.sendPhoto(responseGenerator.generateSendPhotoWithPiePlot(UpdateUtils.extractUserId(update),
                 dataset));

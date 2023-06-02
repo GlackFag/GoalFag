@@ -10,17 +10,18 @@
     </parent>
     <groupId>com.glackfag</groupId>
     <artifactId>GoalFag</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>GoalFag</name>
     <description>Goal tracker telegram bot</description>
     <properties>
         <java.version>17</java.version>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.knowm.xchart/xchart -->
         <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-            <version>1.5.4</version>
+            <groupId>org.knowm.xchart</groupId>
+            <artifactId>xchart</artifactId>
+            <version>3.8.3</version>
         </dependency>
 
         <dependency>

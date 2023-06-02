@@ -7,9 +7,8 @@ import com.glackfag.goalfag.statistics.ChartFormer;
 import com.glackfag.goalfag.util.Commands;
 import com.glackfag.goalfag.util.UpdateUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.jfree.chart.ChartUtils;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.general.PieDataset;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.PieChart;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -83,12 +82,12 @@ public class ResponseGenerator {
         return text;
     }
 
-    public SendPhoto generateSendPhotoWithPiePlot(Long chatId, PieDataset<String> dataset) {
-        JFreeChart chart = chartFormer.formPieChartFromDataset(dataset);
+    public SendPhoto generateSendPhotoWithPiePlot(Long chatId, Map<String, Integer> dataset) {
+        PieChart chart = chartFormer.formPieChartFromDataset(dataset);
 
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ChartUtils.writeChartAsPNG(outputStream, chart, 400, 300);
+            BitmapEncoder.saveBitmap(chart, outputStream, BitmapEncoder.BitmapFormat.PNG);
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
 

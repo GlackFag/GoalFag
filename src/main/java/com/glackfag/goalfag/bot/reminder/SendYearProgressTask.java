@@ -6,7 +6,6 @@ import com.glackfag.goalfag.models.Person;
 import com.glackfag.goalfag.services.PeopleService;
 import com.glackfag.goalfag.statistics.DatasetFormer;
 import lombok.extern.slf4j.Slf4j;
-import org.jfree.data.general.PieDataset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -15,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 
 @Component
@@ -42,7 +42,7 @@ class SendYearProgressTask extends TimerTask {
 
         for (Person e : people) {
             try {
-                PieDataset<String> yearDataSet = datasetFormer.formYearPieDatasetByUserId(e.getUserId());
+                Map<String, Integer> yearDataSet = datasetFormer.formYearPieDatasetByUserId(e.getUserId());
 
                 bot.sendPhoto(responseGenerator.generateSendPhotoWithPiePlot(e.getUserId(), yearDataSet));
             } catch (TelegramApiException ex) {

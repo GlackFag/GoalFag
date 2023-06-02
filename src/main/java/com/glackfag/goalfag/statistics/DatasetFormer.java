@@ -4,13 +4,14 @@ import com.glackfag.goalfag.models.Goal;
 import com.glackfag.goalfag.models.Person;
 import com.glackfag.goalfag.models.enums.GoalState;
 import com.glackfag.goalfag.services.PeopleService;
-import org.jfree.data.general.DefaultPieDataset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class DatasetFormer {
@@ -22,7 +23,7 @@ public class DatasetFormer {
     }
 
     @Transactional
-    public DefaultPieDataset<String> formAllTimePieDatasetByUserId(long userId) {
+    public Map<String, Integer> formAllTimePieDatasetByUserId(long userId) {
         Person person = peopleService.findByUserId(userId);
         List<Goal> goalList = person.getGoals();
 
@@ -30,7 +31,7 @@ public class DatasetFormer {
     }
 
     @Transactional
-    public DefaultPieDataset<String> formYearPieDatasetByUserId(long userId) {
+    public Map<String, Integer> formYearPieDatasetByUserId(long userId) {
         Person person = peopleService.findByUserId(userId);
         List<Goal> goalList = person.getGoals();
 
@@ -45,17 +46,17 @@ public class DatasetFormer {
                 goal.getExpiredDate().getYear() == currentYear;
     }
 
-    public DefaultPieDataset<String> formDataset(List<Goal> goalList) {
-        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
+    public Map<String, Integer> formDataset(List<Goal> goalList) {
+        Map<String, Integer> dataset = new HashMap<>();
 
-        dataset.setValue(GoalState.FINISHED.toString(),
-                goalList.stream().filter(x -> x.getState() == GoalState.FINISHED).count());
+        dataset.put(GoalState.FINISHED.toString(),
+                (int) goalList.stream().filter(x -> x.getState() == GoalState.FINISHED).count());
 
-        dataset.setValue(GoalState.IN_PROGRESS.toString(),
-                goalList.stream().filter(x -> x.getState() == GoalState.IN_PROGRESS).count());
+        dataset.put(GoalState.IN_PROGRESS.toString(),
+                (int) goalList.stream().filter(x -> x.getState() == GoalState.IN_PROGRESS).count());
 
-        dataset.setValue(GoalState.FAILED.toString(),
-                goalList.stream().filter(x -> x.getState() == GoalState.FAILED).count());
+        dataset.put(GoalState.FAILED.toString(),
+                (int) goalList.stream().filter(x -> x.getState() == GoalState.FAILED).count());
 
         return dataset;
     }

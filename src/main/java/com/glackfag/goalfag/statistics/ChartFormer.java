@@ -1,23 +1,18 @@
 package com.glackfag.goalfag.statistics;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.general.PieDataset;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.PieChartBuilder;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class ChartFormer {
-    public JFreeChart formPieChartFromDataset(PieDataset<String> dataset) {
-        JFreeChart chart = ChartFactory.createPieChart(
-                "Goals state", // chart title
-                dataset, // data
-                true, // include legend
-                false, // tooltips
-                false // urls
-        );
+    public PieChart formPieChartFromDataset(Map<String, Integer> dataset) {
+        PieChart chart = new PieChartBuilder().width(400).height(300).title("Goals state").build();
 
-        chart.setBackgroundPaint(null);
-        chart.setBorderVisible(false);
+        for (Map.Entry<String, Integer> entry : dataset.entrySet())
+            chart.addSeries(entry.getKey(), entry.getValue());
 
         return chart;
     }
