@@ -18,130 +18,103 @@ public class ActionRecognizer {
     }
 
     public Action recognize(Update update) {
+        long userId = UpdateUtils.extractUserId(update);
+        String userInput = UpdateUtils.extractUserInput(update);
+        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
+
         if (update.hasCallbackQuery()) {
-            if (isRegister(update))
+            if (isRegister(userId, callbackDataText))
                 return Action.REGISTER;
-            if (isSendNewGoalEssenceForm(update))
+            if (isSendNewGoalEssenceForm(callbackDataText))
                 return Action.SEND_NEW_GOAL_ESSENCE_FORM;
-            if (isShowGoalList(update))
+            if (isShowGoalList(callbackDataText))
                 return Action.SHOW_GOAL_LIST;
-            if (isShowGoalDescription(update))
+            if (isShowGoalDescription(callbackDataText))
                 return Action.SHOW_GOAL_DESCRIPTION;
-            if (isFinishGoal(update))
+            if (isFinishGoal(callbackDataText))
                 return Action.FINISH_GOAL;
-            if (isFailGoal(update))
+            if (isFailGoal(callbackDataText))
                 return Action.FAIL_GOAL;
-            if (isDeleteGoal(update))
+            if (isDeleteGoal(callbackDataText))
                 return Action.DELETE_GOAL;
-            if (isProvideStatistics(update))
+            if (isProvideStatistics(userId, callbackDataText))
                 return Action.PROVIDE_STATISTICS;
-            if(isSetEditOptionsMarkup(update))
+            if(isSetEditOptionsMarkup(callbackDataText))
                 return Action.SET_EDIT_OPTIONS_MARKUP;
         } else {
-            if (isSendGreetings(update))
+            if (isSendGreetings(userId, userInput))
                 return Action.SEND_GREETINGS;
-            if (isSendNewGoalTimeframeForm(update))
+            if (isSendNewGoalTimeframeForm(userId, userInput, callbackDataText))
                 return Action.SEND_NEW_GOAL_TIMEFRAME_FORM;
         }
-        if (isShowMenu(update))
+        if (isShowMenu(userId, userInput, callbackDataText))
             return Action.SHOW_MENU;
-        if (isSaveGoal(update))
+        if (isSaveGoal(userId, userInput))
             return Action.SAVE_GOAL;
 
         return Action.NOTHING;
     }
 
-    private boolean isSendGreetings(Update update) {
-        Long userId = UpdateUtils.extractUserId(update);
-        String userInput = UpdateUtils.extractUserInput(update);
-
+    private boolean isSendGreetings(long userId, String userInput) {
         return userInput.equalsIgnoreCase(Commands.START) && !peopleService.isUserIdRegistered(userId);
     }
 
-    private boolean isRegister(Update update) {
-        if (!update.hasCallbackQuery())
+    private boolean isRegister(long userId, String callbackDataText) {
+        if (callbackDataText.isEmpty())
             return false;
-
-        Long userId = UpdateUtils.extractUserId(update);
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
         return callbackDataText.equals(Commands.REGISTER) && !peopleService.isUserIdRegistered(userId);
     }
 
-    private boolean isShowMenu(Update update) {
-        String userInput = UpdateUtils.extractUserInput(update);
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-        long userId = UpdateUtils.extractUserId(update);
-
+    private boolean isShowMenu(long userId, String userInput, String callbackDataText) {
         return (userInput.equals(Commands.MENU) || userInput.equalsIgnoreCase(Commands.CANCEL) ||
                 userInput.equals(Commands.START) || callbackDataText.equals(Commands.MENU)) &&
                 peopleService.isUserIdRegistered(userId);
     }
 
-    private boolean isProvideStatistics(Update update) {
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-        long userId = UpdateUtils.extractUserId(update);
-
+    private boolean isProvideStatistics(long userId, String callbackDataText) {
         return callbackDataText.equals(Commands.PROVIDE_STATISTICS) && peopleService.isUserIdRegistered(userId);
     }
 
-    private boolean isShowGoalList(Update update) {
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-
+    private boolean isShowGoalList(String callbackDataText) {
         return callbackDataText.equals(Commands.SHOW_GOAL_LIST);
     }
 
-    private boolean isShowGoalDescription(Update update) {
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-
+    private boolean isShowGoalDescription(String callbackDataText) {
         return callbackDataText.startsWith(Commands.SHOW_GOAL_DESCRIPTION);
     }
 
-    private boolean isSetEditOptionsMarkup(Update update){
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-
+    private boolean isSetEditOptionsMarkup(String callbackDataText){
         return callbackDataText.startsWith(Commands.SET_EDIT_OPTIONS_MARKUP);
     }
 
-    private boolean isFinishGoal(Update update) {
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-
+    private boolean isFinishGoal(String callbackDataText) {
         return callbackDataText.startsWith(Commands.FINISH_GOAL);
     }
 
-    private boolean isFailGoal(Update update) {
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-
+    private boolean isFailGoal(String callbackDataText) {
         return callbackDataText.startsWith(Commands.FAIL_GOAL);
     }
 
-    private boolean isDeleteGoal(Update update) {
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
-
+    private boolean isDeleteGoal(String callbackDataText) {
         return callbackDataText.startsWith(Commands.DELETE_GOAL);
     }
 
-    private boolean isSendNewGoalEssenceForm(Update update) {
-        if (!update.hasCallbackQuery())
+    private boolean isSendNewGoalEssenceForm(String callbackDataText) {
+        if (callbackDataText.isEmpty())
             return false;
-
-        String callbackDataText = UpdateUtils.extractCallbackDataText(update);
 
         return callbackDataText.equals(Commands.CREATE_NEW_GOAL);
     }
 
-    private boolean isSendNewGoalTimeframeForm(Update update) {
-        String userInput = UpdateUtils.extractUserInput(update);
-        Action lastAction = Person.getLastAction(UpdateUtils.extractUserId(update));
+    private boolean isSendNewGoalTimeframeForm(long userId, String userInput, String callbackDataText) {
+        Action lastAction = Person.getLastAction(userId);
 
-        return !update.hasCallbackQuery() && lastAction == Action.SEND_NEW_GOAL_ESSENCE_FORM &&
+        return callbackDataText.isEmpty() && lastAction == Action.SEND_NEW_GOAL_ESSENCE_FORM &&
                 !userInput.equalsIgnoreCase(Commands.CANCEL);
     }
 
-    private boolean isSaveGoal(Update update) {
-        Long userId = UpdateUtils.extractUserId(update);
-        String userInput = UpdateUtils.extractUserInput(update);
-
+    private boolean isSaveGoal(long userId, String userInput) {
         return Person.getLastAction(userId) == Action.SEND_NEW_GOAL_TIMEFRAME_FORM && !userInput.equalsIgnoreCase(Commands.CANCEL);
     }
 }

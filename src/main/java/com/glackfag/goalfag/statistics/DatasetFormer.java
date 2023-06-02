@@ -26,7 +26,7 @@ public class DatasetFormer {
         Person person = peopleService.findByUserId(userId);
         List<Goal> goalList = person.getGoals();
 
-        return formDataSet(goalList);
+        return formDataset(goalList);
     }
 
     @Transactional
@@ -36,7 +36,7 @@ public class DatasetFormer {
 
         goalList.removeIf(x -> !isGoalForThisYear(x));
 
-        return formDataSet(goalList);
+        return formDataset(goalList);
     }
 
     private static boolean isGoalForThisYear(Goal goal) {
@@ -45,7 +45,7 @@ public class DatasetFormer {
                 goal.getExpiredDate().getYear() == currentYear;
     }
 
-    public DefaultPieDataset<String> formDataSet(List<Goal> goalList) {
+    public DefaultPieDataset<String> formDataset(List<Goal> goalList) {
         DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
 
         dataset.setValue(GoalState.FINISHED.toString(),
@@ -54,8 +54,8 @@ public class DatasetFormer {
         dataset.setValue(GoalState.IN_PROGRESS.toString(),
                 goalList.stream().filter(x -> x.getState() == GoalState.IN_PROGRESS).count());
 
-        dataset.setValue(GoalState.FINISHED.toString(),
-                goalList.stream().filter(x -> x.getState() == GoalState.FINISHED).count());
+        dataset.setValue(GoalState.FAILED.toString(),
+                goalList.stream().filter(x -> x.getState() == GoalState.FAILED).count());
 
         return dataset;
     }
